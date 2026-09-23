@@ -1,0 +1,9 @@
+node_modules/
+npm-debug.log*
+
+# cookies.txt bisa berisi sesi login akun Google/YouTube - jangan pernah di-commit.
+# Isinya diberikan lewat Environment Variable YT_COOKIES di Render, bukan lewat file ini.
+cookies.txt
+
+.env
+.DS_Store
