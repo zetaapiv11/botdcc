@@ -14,7 +14,7 @@
  * 2. Otomatis kepakai oleh yt-dlp tanpa perlu ubah kode @distube/yt-dlp.
  *
  * Ini yang dipakai buat "meredam" error umum:
- * - "Sign in to confirm you're not a bot" -> lewat extractor-args player_client
+ * - "Sign in to confirm you're not a bot" -> lewat extractor-args player-client
  *   (yt-dlp akan coba beberapa "client" YouTube secara berurutan) dan/atau cookies.
  */
 const fs = require("fs");
@@ -33,8 +33,19 @@ function ensureYtDlpConfig() {
 
     const lines = [];
 
+    // Suppress semua baris WARNING/"Deprecated Feature" dari yt-dlp supaya
+    // TIDAK ikut kecampur ke output --dump-json yang di-parse @distube/yt-dlp
+    // (ini penyebab paling umum error "SyntaxError: Unexpected token ... is
+    // not valid JSON" pas play link YouTube).
+    lines.push(`--no-warnings`);
+
     if (Array.isArray(ytConfig.playerClients) && ytConfig.playerClients.length) {
-        lines.push(`--extractor-args "youtube:player_client=${ytConfig.playerClients.join(",")}"`);
+        // PENTING: sejak yt-dlp versi terbaru, key extractor-args untuk YouTube
+        // berubah dari "player_client" (underscore, LAMA/deprecated) jadi
+        // "player-client" (strip, BARU). Pakai key lama bikin yt-dlp mencetak
+        // "Deprecated Feature: ..." ke output DAN diam-diam mengabaikan filter
+        // client-nya (makanya play jadi lambat - yt-dlp coba semua client bawaan).
+        lines.push(`--extractor-args "youtube:player-client=${ytConfig.playerClients.join(",")}"`);
     }
 
     // (v3.1) JS runtime eksternal - WAJIB sejak yt-dlp 2025.11.x buat YouTube bisa
